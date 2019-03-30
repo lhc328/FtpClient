@@ -6,11 +6,12 @@ import java.io.OutputStream;
 
 public class ResponseResult {
 	
-	public static void getResponse(InputStream inputStream) throws IOException {
+	public static String getResponse(InputStream inputStream) throws IOException {
 		byte[] bytes = new byte[256];
 		int len = inputStream.read(bytes);
 		String result = new String(bytes, 0, len);
 		System.out.println(result);
+		return result;
 	}
 	
 	public static void sendLine(OutputStream outputStream, String cmd) throws IOException {

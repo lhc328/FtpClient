@@ -1,16 +1,15 @@
 package Main;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.sound.sampled.Port;
-
-import com.sun.media.jfxmedia.events.NewFrameEvent;
 
 public class FtpUtils {
 	
@@ -31,7 +30,7 @@ public class FtpUtils {
 	
 	
 	/*
-	 * ½¨Á¢Á¬½Ó
+	 * ç™»å½•
 	 */
 	public void ftp_connect(String username, String password) {
 		try {
@@ -58,7 +57,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * ²é¿´µ±Ç°Ä¿Â¼
+	 * list
 	 */
 	public void ftp_list() {
 		String modMsg = "PASV\n";
@@ -87,7 +86,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * ²é¿´µ±Ç°Â·¾¶
+	   * æŸ¥çœ‹å½“å‰ç›®å½•
 	 */
 	public void ftp_pwd() {
 		String cwd = "PWD\n";
@@ -102,7 +101,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * ¶Ï¿ªÁ¬½Ó
+	 * é€€å‡º
 	 */
 	public void ftp_quit() {
 		String cmd = "QUIT\n";
@@ -120,7 +119,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * ½øÈëÄ¿Â¼
+	 * æ›´æ”¹ç›®å½•
 	 */
 	public void ftp_cd(String dir) {
 		String cwd = "CWD " + dir + "\n";
@@ -135,22 +134,49 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * ĞÂ½¨ÎÄ¼ş¼Ğ
+	 * æ–°å»ºç›®å½•
 	 * MKD DIR
 	 */
+	public void ftp_mkdir(String dir) {
+		String mkd = "MKD " + dir +"\n";
+		try {
+			outputStream.write(mkd.getBytes());
+			ResponseResult.getResponse(inputStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/*
-	 * É¾³ıÎÄ¼ş¼Ğ
+	 * åˆ é™¤ç›®å½•
 	 * RMD DIR
+	 */
+	public void ftp_rmdir(String dir) {
+		String rmd = "RMD " + dir +"\n";
+		try {
+			outputStream.write(rmd.getBytes());
+			ResponseResult.getResponse(inputStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/*
+	 * åˆ é™¤æ–‡ä»¶
+	 * DELE
 	 */
 	
 	/*
-	 * ÉÏ´«ÎÄ¼ş
+	 * ä¸Šä¼ æ–‡ä»¶
 	 * STOR FILENAME
 	 * STOU FILENAME
 	 */
-	public void ftp_stor(File file) {
+	public void ftp_stor(String sendfile) {
+		File file = new File(sendfile);
 		if(file.isDirectory()) {
 			System.out.println("cannot upload a directory");
 			return;
@@ -163,6 +189,7 @@ public class FtpUtils {
 			int port = ResponseResult.getPort(inputStream);
 			
 			outputStream.write(sendFile.getBytes());
+			//ResponseResult.getResponse(inputStream);
 			
 			System.out.println(port);
 			
@@ -189,6 +216,37 @@ public class FtpUtils {
 	
 	
 	/*
-	 * ÏÂÔØÎÄ¼ş
+	 * ä¸‹è½½æ–‡ä»¶
 	 */
+	public void ftp_retr(String file, String fileName) {
+		String pasv = "PASV\n";
+		String downFile = "RETR " +file +"\n"; 
+		try {
+			outputStream.write(pasv.getBytes());
+			int port = ResponseResult.getPort(inputStream);
+			System.out.println(port);
+			outputStream.write(downFile.getBytes());
+			
+			Socket socket = new Socket(this.url, port);
+			//å…ˆè¿æ¥è¢«åŠ¨ç«¯å£ï¼Œæ‰èƒ½æ¥å—æ˜¯å¦èƒ½ä¸‹è½½çš„å‘½ä»¤ç 
+			String response = ResponseResult.getResponse(inputStream);
+			if(response.startsWith("150")) {
+				File newFile = new File(fileName);
+				OutputStream fileOutput = new FileOutputStream(newFile);
+				InputStream fileInput = socket.getInputStream();
+				byte[] bytes = new byte[10000];
+				int fileLen = 0;
+				while((fileLen = fileInput.read(bytes))!=-1) {
+					System.out.println("file is downloading ...");
+					fileOutput.write(bytes, 0, fileLen);
+				}
+				fileOutput.close();
+				fileInput.close();
+				ResponseResult.getResponse(inputStream);
+			}
+			socket.close();
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
 }

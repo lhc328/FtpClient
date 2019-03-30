@@ -10,8 +10,10 @@ public class Client {
 		ftpUtils.ftp_pwd();
 		ftpUtils.ftp_cd("upload");
 		ftpUtils.ftp_pwd();
-		File file = new File("E:\\eclipse-workspace\\FTPClient\\src\\resource\\1.txt");
-		ftpUtils.ftp_stor(file);
+		ftpUtils.ftp_rmdir("book");
+		//File file = new File("E:\\eclipse\\FtpClient\\src\\resource\\1.txt");
+		//ftpUtils.ftp_stor(file);
+		//ftpUtils.ftp_retr("/upload/1.txt", "E:\\eclipse\\FtpClient\\src\\resource\\2.txt");
 		ftpUtils.ftp_quit();
 	}
 }

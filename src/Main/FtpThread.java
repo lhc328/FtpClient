@@ -17,8 +17,6 @@ public class FtpThread implements Runnable {
 			InputStream inputStream = socket.getInputStream();
 			OutputStream outputStream = socket.getOutputStream();
 			
-			//ResponseResult.getResponse(inputStream);
-			
 			byte[] bytes = new byte[10000];
 			System.out.println("[+]PASV thread is start at port " + this.port);
 			int len = inputStream.read(bytes);
