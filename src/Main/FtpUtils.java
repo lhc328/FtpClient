@@ -1,6 +1,5 @@
 package Main;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
 
 public class FtpUtils {
 	
@@ -30,22 +28,13 @@ public class FtpUtils {
 	
 	
 	/*
-	 * ç™»å½•
+	 * ½¨Á¢Á¬½Ó
 	 */
-	public void ftp_connect(String username, String password) {
+	public void ftp_connect() {
 		try {
-			System.out.println(username+password+url+port);
 			socket = new Socket(url, port);
 			inputStream = socket.getInputStream();
 			outputStream = socket.getOutputStream();
-			ResponseResult.getResponse(inputStream);
-			
-			String name = "USER "+username+"\n";
-			outputStream.write(name.getBytes());
-			ResponseResult.getResponse(inputStream);
-			
-			String pass = "PASS " + password + "\n";
-			outputStream.write(pass.getBytes());
 			ResponseResult.getResponse(inputStream);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -56,8 +45,36 @@ public class FtpUtils {
 		}
 	}
 	
+	public void ftp_user(String username) {
+		String name = "USER "+username+"\n";
+		try {
+			outputStream.write(name.getBytes());
+			String response = ResponseResult.getResponse(inputStream);
+			if(response.startsWith("220")) {
+				
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void ftp_pass(String password) {
+		try {
+			String pass = "PASS " + password + "\n";
+			outputStream.write(pass.getBytes());
+			String response = ResponseResult.getResponse(inputStream);
+			if(response.startsWith("220")) {
+				
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
 	/*
-	 * list
+	 * ²é¿´µ±Ç°Ä¿Â¼
 	 */
 	public void ftp_list() {
 		String modMsg = "PASV\n";
@@ -86,12 +103,11 @@ public class FtpUtils {
 	}
 	
 	/*
-	   * æŸ¥çœ‹å½“å‰ç›®å½•
+	 * ²é¿´µ±Ç°Â·¾¶
 	 */
 	public void ftp_pwd() {
 		String cwd = "PWD\n";
 		try {
-			System.out.println("[+]send pwd");
 			outputStream.write(cwd.getBytes());
 			ResponseResult.getResponse(inputStream);
 		} catch (IOException e) {
@@ -101,7 +117,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * é€€å‡º
+	 * ¶Ï¿ªÁ¬½Ó
 	 */
 	public void ftp_quit() {
 		String cmd = "QUIT\n";
@@ -119,7 +135,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * æ›´æ”¹ç›®å½•
+	 * ½øÈëÄ¿Â¼
 	 */
 	public void ftp_cd(String dir) {
 		String cwd = "CWD " + dir + "\n";
@@ -134,7 +150,7 @@ public class FtpUtils {
 	}
 	
 	/*
-	 * æ–°å»ºç›®å½•
+	 * ĞÂ½¨ÎÄ¼ş¼Ğ
 	 * MKD DIR
 	 */
 	public void ftp_mkdir(String dir) {
@@ -150,7 +166,7 @@ public class FtpUtils {
 	
 	
 	/*
-	 * åˆ é™¤ç›®å½•
+	 * É¾³ıÎÄ¼ş¼Ğ
 	 * RMD DIR
 	 */
 	public void ftp_rmdir(String dir) {
@@ -164,14 +180,22 @@ public class FtpUtils {
 		}
 	}
 	
-	
 	/*
-	 * åˆ é™¤æ–‡ä»¶
-	 * DELE
+	 * É¾³ıÎÄ¼ş
 	 */
+	public void ftp_delete(String name) {
+		String dete = "DELE " + name + "\n";
+		try {
+			outputStream.write(dete.getBytes());
+			ResponseResult.getResponse(inputStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/*
-	 * ä¸Šä¼ æ–‡ä»¶
+	 * ÉÏ´«ÎÄ¼ş
 	 * STOR FILENAME
 	 * STOU FILENAME
 	 */
@@ -189,11 +213,9 @@ public class FtpUtils {
 			int port = ResponseResult.getPort(inputStream);
 			
 			outputStream.write(sendFile.getBytes());
-			//ResponseResult.getResponse(inputStream);
-			
-			System.out.println(port);
 			
 			Socket socket = new Socket(this.url, port);
+			ResponseResult.getResponse(inputStream);
 			OutputStream fileOutput = socket.getOutputStream();
 			InputStream fileInput = new FileInputStream(file);
 			byte[] bytes = new byte[4096];
@@ -216,7 +238,7 @@ public class FtpUtils {
 	
 	
 	/*
-	 * ä¸‹è½½æ–‡ä»¶
+	 * ÏÂÔØÎÄ¼ş
 	 */
 	public void ftp_retr(String file, String fileName) {
 		String pasv = "PASV\n";
@@ -224,11 +246,10 @@ public class FtpUtils {
 		try {
 			outputStream.write(pasv.getBytes());
 			int port = ResponseResult.getPort(inputStream);
-			System.out.println(port);
 			outputStream.write(downFile.getBytes());
 			
 			Socket socket = new Socket(this.url, port);
-			//å…ˆè¿æ¥è¢«åŠ¨ç«¯å£ï¼Œæ‰èƒ½æ¥å—æ˜¯å¦èƒ½ä¸‹è½½çš„å‘½ä»¤ç 
+			//ÏÈÁ¬½Ó±»¶¯¶Ë¿Ú£¬²ÅÄÜ½ÓÊÜÊÇ·ñÄÜÏÂÔØµÄÃüÁîÂë
 			String response = ResponseResult.getResponse(inputStream);
 			if(response.startsWith("150")) {
 				File newFile = new File(fileName);

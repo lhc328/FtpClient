@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+
 public class FtpThread implements Runnable {
 	
 	public String url;
@@ -17,15 +18,19 @@ public class FtpThread implements Runnable {
 			InputStream inputStream = socket.getInputStream();
 			OutputStream outputStream = socket.getOutputStream();
 			
+			//ResponseResult.getResponse(inputStream);
+			
 			byte[] bytes = new byte[10000];
-			System.out.println("[+]PASV thread is start at port " + this.port);
+			//System.out.println("[+]PASV thread is start at port " + this.port);
 			int len = inputStream.read(bytes);
-			String ls = new String(bytes, 0, len, "utf-8");
-			System.out.println(ls);
+			if(len!=-1) {
+				String ls = new String(bytes, 0, len, "utf-8");
+				System.out.print(ls);
+			}
 			inputStream.close();
 			outputStream.close();
 			socket.close();
-			System.out.println("[+] PASV thread is close");
+			//System.out.println("[+] PASV thread is close");
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
